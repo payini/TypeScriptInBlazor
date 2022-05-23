@@ -7,9 +7,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\helpers.js" />
+    <Content Remove="wwwroot\helpers.js.map" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="wwwroot\js\helpers.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\js\helpers.js" />
+    <None Include="wwwroot\js\helpers.js.map" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.6.4">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 

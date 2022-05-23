@@ -1,4 +1,5 @@
 ﻿@page "/"
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Index</PageTitle>
 
@@ -7,3 +8,14 @@
 Welcome to your new app.
 
 <SurveyPrompt Title="How is Blazor working for you?" />
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Get a reference of hour TypeScript helpers.getLogger class.
+        var jsObject = await this.JSRuntime.InvokeAsync<IJSObjectReference>("helpers.getLogger");
+
+        // Invoke the log method.
+        await jsObject.InvokeVoidAsync("log", new object[1] { $"LOG {DateTime.Now} - OnAfterRenderAsync called." });
+    }
+}
