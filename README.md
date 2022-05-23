@@ -36,6 +36,8 @@ The following prerequisites are needed for this demo.
 
 Download the latest version of the .NET 6.0 SDK [here](https://dotnet.microsoft.com/en-us/download).
 
+>:blue_book: The demo below also applies to `ASP.NET Core` versions 3.0, 3.1, and 5.0, but we are using 6.0 for this demo.
+
 ### Visual Studio 2022 Preview
 
 For this demo, we are going to use the latest version of [Visual Studio 2022 Preview](https://visualstudio.microsoft.com/vs/community/).
@@ -319,11 +321,15 @@ Now is time to integrate TypeScript into our Blazor application.
 
 Let's open up `Index.razor` and inject the `IJSRuntime` with `@inject IJSRuntime JSRuntime`. `IJSRuntime` lives in the `Microsoft.JSInterop` assembly, which already comes with the .NET 6.0 reference added by the template when we first created the application.
 
+>:blue_book: IJSRuntime is an interface that represents an instance of a JavaScript runtime, which we can use to dispatch calls to it.
+
 You can find that out by expanding `Dependencies` and then `Frameworks` under `Microsoft.AspNetCore.App` in the Solution Explored, and then going towards the bottoms of the dlls.
 
 ![Microsoft.AspNetCore.App](images/7b61dfcc3573cd66d2441766c480cfcd736afb22aa32831b3cd681ff1131e085.png)  
 
-![Microsoft.JSInterop](images/0eac9919ec530489565b5bf3f1f75cbe84704b89b6d007a7acd8f9509b1d2cdd.png)  
+![Microsoft.JSInterop](images/0eac9919ec530489565b5bf3f1f75cbe84704b89b6d007a7acd8f9509b1d2cdd.png)
+
+>:blue_book: The `Microsoft.JSInterop` namespace contains all the infrastructure you need to be able to make method calls between .NET and JavaScript in Blazor applications.
 
 Now that `IJSRuntime` is setup to be injected, let's use it to get a reference to our TypeScript's `helpers` class.
 
