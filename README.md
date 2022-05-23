@@ -8,6 +8,7 @@
     - [Mobile Development with .NET Workload](#mobile-development-with-net-workload)
   - [Demos](#demos)
     - [Create a Blazor Server Application](#create-a-blazor-server-application)
+    - [Create TypeScript Code](#create-typescript-code)
     - [Integrate TypeScript in Blazor](#integrate-typescript-in-blazor)
   - [Conclusion](#conclusion)
   - [Complete Code](#complete-code)
@@ -35,7 +36,9 @@ In order to build Blazor apps, the ASP.NET and web development workload needs to
 
 ## Demos
 
-In the following demo we will create a Blazor application and I will show you how to use TypeScript in it.
+In the following demo we will create a Blazor application and I will show you how to use TypeScript in it. I followed some of the demos out there on the Internet, but some of them seem to be missing important steps. So, as we build this demo, I will deliberately make some common mistakes, so I can show you how to troubleshoot the process and interpret the errors.
+
+>:blue_book: I will identify the mistakes with notes with the bomb emoji :bomb:.
 
 ### Create a Blazor Server Application
 
@@ -199,9 +202,9 @@ The application should open on your default browser after.
 
 ![Blazor App](images/a983df250e67e0879405c79ef24de82b9396036787e6e1233ca61e9542ce6904.png)  
 
-### Integrate TypeScript in Blazor
+### Create TypeScript Code
 
-In order to integrate TypeScript in our Blazor app, we need to install a `NuGet` package called `Create a Blazor Application`, by first typing `Control+C` to stop the running app, and using `dotnet add package` to install the package.
+In order to integrate TypeScript code into our Blazor application, first we need to be able to build TypeScript code. You do that by adding `NuGet` package called `Microsoft.TypeScript.MSBuild`, by first typing `Control+C` to stop the running app, and using `dotnet add package` to install the package.
 
 ```dotnetcli
 Control+C
@@ -227,7 +230,226 @@ info : Writing assets file to disk. Path: Y:\TypeScriptInBlazor\TypeScriptInBlaz
 log  : Restored Y:\TypeScriptInBlazor\TypeScriptInBlazor\TypeScriptInBlazor.csproj (in 2.03 sec).
 ```
 
+Now, let's move to Visual Studio and pen the application.
+
+![Visual Studio Solution](images/8e30f77aed45267beebbfb3d7b3bd28dbe3fe59564a387125e1bc04a1e12eaf4.png)  
+
+Add a new item to the project,
+
+![Add new item](images/43b40ebbbb5ba893be69a32d2fa22100c15d48f6cd65b4c4b3a66af4fe8ca456.png)
+
+>:bomb: There is a mistake in this step, can you identify what is it?
+
+In the Add New Item dialog, search for `typescript`, change the default file name to `helpers.ts` and add the file.
+
+![Add new item dialog](images/4f332cda7fc20c65795ad4b1840a02f89c21b490e61fa9218ed5e9ec539ae4d9.png)  
+
+Let's create now a helper `Logger` class, with a single `log` method that takes a string parameter `text` to be logged into the console. In addition to that, we need to to create a method to return an instance of the `Logger` class, using `export`.
+
+Add the following code to your `helpers.ts` file.
+
+```typescript
+namespace helpers {
+    // Simple logger class that exposes a log method.
+    class Logger {
+        // Log text to the console.
+        public log(text: string) {
+            console.log(text);
+        }
+    }
+
+    // Method to return an instance of the Logger class.
+    export function getLogger(): Logger {
+        return new Logger();
+    }
+}
+```
+
+Build the project and verify that along with `helpers.ts` you'll see `helpers.js`, and `helpers.js.map`.
+
+![js. and js.map files](images/5905ae3982d931f094711c49720a6282d773f3959bdc580a1f840cbc1fca8059.png)  
+
+What happened here, is the builder took the TypeScript file and transformed it to JavaScript and added a map file. You may want to open and inspect `helpers.js`, and `helpers.js.map` and see the results of the build process done by the `Microsoft.TypeScript.MSBuild` package.
+
+`helpers.js`
+
+```javascript
+var helpers;
+(function (helpers) {
+    // Simple logger class that exposes a log method.
+    var Logger = /** @class */ (function () {
+        function Logger() {
+        }
+        // Log text to the console.
+        Logger.prototype.log = function (text) {
+            alert('test');
+            console.log(text);
+        };
+        return Logger;
+    }());
+    // Method to return an instance of the Logger class.
+    function getLogger() {
+        return new Logger();
+    }
+    helpers.getLogger = getLogger;
+})(helpers || (helpers = {}));
+//# sourceMappingURL=helpers.js.map
+```
+
+```javascript
+{"version":3,"file":"helpers.js","sourceRoot":"","sources":["helpers.ts"],"names":[],"mappings":"AAAA,IAAU,OAAO,CAchB;AAdD,WAAU,OAAO;IACb,iDAAiD;IACjD;QAAA;QAMA,CAAC;QALG,2BAA2B;QACpB,oBAAG,GAAV,UAAW,IAAY;YACnB,KAAK,CAAC,MAAM,CAAC,CAAC;YACd,OAAO,CAAC,GAAG,CAAC,IAAI,CAAC,CAAC;QACtB,CAAC;QACL,aAAC;IAAD,CAAC,AAND,IAMC;IAED,oDAAoD;IACpD,SAAgB,SAAS;QACrB,OAAO,IAAI,MAAM,EAAE,CAAC;IACxB,CAAC;IAFe,iBAAS,YAExB,CAAA;AACL,CAAC,EAdS,OAAO,KAAP,OAAO,QAchB"}
+```
+
+>:pencil2: Try removing the reference to `Microsoft.TypeScript.MSBuild` and build the application. The application will still build, but no `helpers.js`, and `helpers.js.map` will be generated.
+
+### Integrate TypeScript in Blazor
+
+It is finally time to integrate TypeScript into our Blazor application.
+
+Let's open up `Index.razor` and inject the `IJSRuntime` with `@inject IJSRuntime JSRuntime`. `IJSRuntime` lives in the `Microsoft.JSInterop` assembly, which already comes with the .NET 6.0 reference added by the template when we first created the application.
+
+You can finding by expanding `Dependencies/Frameworks` under `Microsoft.AspNetCore.App` and going towards the bottoms of the dlls.
+
+![Microsoft.AspNetCore.App](images/7b61dfcc3573cd66d2441766c480cfcd736afb22aa32831b3cd681ff1131e085.png)  
+
+![Microsoft.JSInterop](images/0eac9919ec530489565b5bf3f1f75cbe84704b89b6d007a7acd8f9509b1d2cdd.png)  
+
+Now that is ready to be injected, let's use it to get a reference to our `TypeScript` helpers class.
+
+Add a `@code {}` and let's try getting our helper class using `JSRuntime.InvokeAsync` extension method by overriding the `OnInitializedAsync` method.
+
+After that we are going to call `InvokeVoidAsync` from our object reference, and pass the name of our `TypeScript` class `log` as the first parameter. Since `log` takes a `text: string` parameter, we can pass that creating an array of objects and passing the data along.
+
+If you look at the `InvokeVoidAsync`'s signature, you will see it takes an arrays of objects, so let's do that.
+
+![If you look at the `InvokeVoidAsync`'s signature, you will see it takes an arrays of objects, so let's do that.
+](images/cfd62f07f87c609041b547bce74bacabaf34c0bdf46a16f987a2d4fcadc1cde8.png)  
+
+```csharp
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Get a reference of hour TypeScript helpers.getLogger class.
+        var jsObject = await this.JSRuntime.InvokeAsync<IJSObjectReference>("helpers.getLogger");
+
+        // Invoke the log method.
+        await jsObject.InvokeVoidAsync("log", new object[1] { $"LOG {DateTime.Now} - OnInitializedAsync called." });
+    }
+}
+```
+
+The whole file looks like this now:
+
+```csharp
+@page "/"
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Index</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Get a reference of hour TypeScript helpers.getLogger class.
+        var jsObject = await this.JSRuntime.InvokeAsync<IJSObjectReference>("helpers.getLogger");
+
+        // Invoke the log method.
+        await jsObject.InvokeVoidAsync("log", new object[1] { $"LOG {DateTime.Now} - OnInitializedAsync called." });
+    }
+}
+```
+
+>:bomb: However there is another issue here. Let's run the application and see what it is.
+
+![OnAfterRenderAsync Exception](images/2a0107ba578591e43564b633739742ac2c86c237e05c094d37c4b6e654c02f15.png)  
+
+Luckily the exception message is very clear, we cannot make JavaScript interop calls during the `OnInitializedAsync` event. We need to move our code to `OnAfterRenderAsync`.
+
+Override `OnAfterRenderAsync` and move the code there.
+
+```csharp
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Get a reference of hour TypeScript helpers.getLogger class.
+        var jsObject = await this.JSRuntime.InvokeAsync<IJSObjectReference>("helpers.getLogger");
+
+        // Invoke the log method.
+        await jsObject.InvokeVoidAsync("log", new object[1] { $"LOG {DateTime.Now} - OnAfterRenderAsync called." });
+    }
+}
+```
+
+Now, coming back to the first "mistake" did you figure it out? If you run the application now, you will get an unhandled exception.
+
+Notice, that unlike the exception before, the application will run, but we are getting notified of the exception on the bottom bar.
+
+![Unhandled Exception](images/8dfb3a85caa3dc12cdbe9f8c644fa2852a480bd21551f5d6811acbc574bd1eda.png)  
+
+This is because on the first exception, the issue happened at runtime, on the C# call when we called `InvokeAsync`, in this case, the exception happened on the JavaScript called, while trying to get the instance of our helper class.
+
+Therefore, you can use the F12 Development Tools on your browser to see what's going on.
+
+![JSException Exception](images/ab8f06bdb89310971707d78afc38f6766d5c54e9283b90832b39bd918935031a.png)  
+
+The exception: Error: Could not find 'helpers.getLogger' ('helpers' was undefined) happens because we added our `helpers.ts` to the root of the project, and we need to add it to the `wwwroot` folder. Let's create a `js` folder under `wwwroot` and move `helpers.ts` there.
+
+And since `helpers.ts` gets transformed to `helpers.js` we need to add a script reference to it. Let's open `Layout.cshtml` and add `<script src="~/js/helpers.js"></script>` to it.
+
+The `Layout.cshtml` file should look like this:
+
+```razor
+@using Microsoft.AspNetCore.Components.Web
+@namespace TypeScriptInBlazor.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="~/" />
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link href="css/site.css" rel="stylesheet" />
+    <link href="TypeScriptInBlazor.styles.css" rel="stylesheet" />
+    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+</head>
+<body>
+    @RenderBody()
+
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            An error has occurred. This application may no longer respond until reloaded.
+        </environment>
+        <environment include="Development">
+            An unhandled exception has occurred. See browser dev tools for details.
+        </environment>
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="_framework/blazor.server.js"></script>
+    <script src="~/js/helpers.js"></script>
+</body>
+</html>
+```
+
+And that should be it. Let's run the application, and open the F12 Development Tools. Then click a few times around the different menu options (Home, Counter, Fetch data.) We only added the logger to the Home page, so every time you move to the Home page, you should see the logging entry.
+
+![Logs](images/0f51ae84b77afff3357f4f07302c95c9943dfb2bc6c5aea5f0702d577412590f.png)  
+
+And that concludes our demo.
+
 ## Conclusion
+
+As you can see, adding the ability to use TypeScript in a Blazor application, and be able to call from C# is a very simple process. Just first added a reference to the NuGet package `Microsoft.TypeScript.MSBuild`, then we injected `IJSRuntime` into one of our razor pages, we got a reference to the object and invoke the `log` method using `JSInterop`.
+
+For more information about TypeScript and JSRuntime, check the links in the resources section below.
 
 ## Complete Code
 
@@ -237,8 +459,10 @@ The complete code for this demo can be found in the link below.
 
 ## Resources
 
-| Resource Title                        | Url                                                                         |
-| ------------------------------------- | --------------------------------------------------------------------------- |
-| The .NET Show with Carl Franklin      | <https://www.youtube.com/playlist?list=PL8h4jt35t1wgW_PqzZ9USrHvvnk8JMQy_>  |
-| Download .NET                         | <https://dotnet.microsoft.com/en-us/download>                               |
-| .NET default templates for dotnet new | https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new-sdk-templates |
+| Resource Title                        | Url                                                                                            |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| The .NET Show with Carl Franklin      | <https://www.youtube.com/playlist?list=PL8h4jt35t1wgW_PqzZ9USrHvvnk8JMQy_>                     |
+| Download .NET                         | <https://dotnet.microsoft.com/en-us/download>                                                  |
+| .NET default templates for dotnet new | https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new-sdk-templates                    |
+| Microsoft.JSInterop Namespace         | https://docs.microsoft.com/en-us/dotnet/api/microsoft.jsinterop?view=aspnetcore-6.0            |
+| IJSRuntime Interface                  | https://docs.microsoft.com/en-us/dotnet/api/microsoft.jsinterop.ijsruntime?view=aspnetcore-6.0 |
