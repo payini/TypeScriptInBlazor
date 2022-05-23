@@ -16,6 +16,18 @@
 
 ## Introduction
 
+In this episode, we are going to build a Blazor Server App using the `dotnet` CLI. We are going to enable `TypeScript` by adding a NuGet package reference. Then we are going to build a simple `logger` class in TypeScript. Lastly, we are going to leverage `JSInterop` and the `IJSRuntime` interface, to be able to call `JavaScript` code generated from the `TypeScript` file, from our C# code in the Blazor app.
+
+We are also going to troubleshoot some common exceptions you may experience along the way.
+
+At the end, you should end-up with a sample app that logs data in the browser's console.
+
+End results will look like this:
+
+![Logs](images/0f51ae84b77afff3357f4f07302c95c9943dfb2bc6c5aea5f0702d577412590f.png)
+
+Let's get to it.
+
 ## Prerequisites
 
 The following prerequisites are needed for this demo.
@@ -441,7 +453,7 @@ The `Layout.cshtml` file should look like this:
 
 And that should be it. Let's run the application, and open the F12 Development Tools. Then click a few times around the different menu options (Home, Counter, Fetch data.) We only added the logger to the Home page, so every time you move to the Home page, you should see the logging entry.
 
-![Logs](images/0f51ae84b77afff3357f4f07302c95c9943dfb2bc6c5aea5f0702d577412590f.png)  
+![Logs](images/0f51ae84b77afff3357f4f07302c95c9943dfb2bc6c5aea5f0702d577412590f.png)
 
 And that concludes our demo.
 
